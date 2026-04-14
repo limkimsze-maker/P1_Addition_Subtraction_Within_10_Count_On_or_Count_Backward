@@ -595,13 +595,13 @@
       const items = state.mode === 'add'
         ? [
             `Look at ${q.a} + ${q.b}. Put the bigger number, ${q.headNum}, in your head.`,
-            `Show ${q.fingerNum} fingers on 2 hands.`,
+            `Show ${q.fingerNum} fingers.`,
             `Count on ${q.fingerNum} times: ${q.counted.join(', ')}.`,
             `Write the answer and press Check.`
           ]
         : [
             `Look at ${q.a} − ${q.b}. Put ${q.headNum} in your head.`,
-            `Show ${q.fingerNum} fingers on 2 hands.`,
+            `Show ${q.fingerNum} fingers.`,
             `Count back ${q.fingerNum} times: ${q.counted.join(', ')}.`,
             `Write the answer and press Check.`
           ];
@@ -818,8 +818,8 @@
     function introSpeech(){
       const q = state.question;
       return state.mode === 'add'
-        ? `Look at ${q.a} + ${q.b}. Put the bigger number, ${q.headNum}, in your head. Show ${q.fingerNum} fingers on 2 hands.`
-        : `Look at ${q.a} minus ${q.b}. Put ${q.headNum} in your head. Show ${q.fingerNum} fingers on 2 hands.`;
+        ? `Look at ${q.a} + ${q.b}. Put the bigger number, ${q.headNum}, in your head. Show ${q.fingerNum} fingers.`
+        : `Look at ${q.a} minus ${q.b}. Put ${q.headNum} in your head. Show ${q.fingerNum} fingers.`;
     }
 
     function stepSpeech(){
