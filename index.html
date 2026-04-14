@@ -41,11 +41,8 @@
 
     .wrap{
       width:min(1500px, calc(100vw - 20px));
-      height:calc(100vh - 16px);
-      margin:8px auto;
+      margin:8px auto 0;
       transform-origin:top center;
-      display:flex;
-      flex-direction:column;
     }
 
     .hero,.card{
@@ -104,21 +101,7 @@
     .pill.active-add{ background:linear-gradient(180deg,#fff4bf,#ffd86c); }
     .pill.active-sub{ background:linear-gradient(180deg,#ffe1ea,#ffb2c9); }
 
-    .main{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns:1fr;
-      gap:14px;
-      flex:1;
-      min-height:0;
-    }
-
-    .play-card{
-      height:100%;
-      display:flex;
-      flex-direction:column;
-    }
-
+    .main{ margin-top:14px; display:grid; grid-template-columns:1fr; gap:14px; }
     .card{ padding:18px; }
 
     .problem-bar{
@@ -238,13 +221,7 @@
     .tape-title{ font-size:20px; font-weight:900; }
     .steps{ font-size:15px; color:var(--muted); font-weight:800; }
 
-    .tape-wrap{
-      position:relative;
-      width:100%;
-      padding-top:4px;
-      min-height:126px;
-      flex:1;
-    }
+    .tape-wrap{ position:relative; width:100%; padding-top:4px; min-height:126px; }
     .number-tape{
       position:relative;
       width:max-content;
@@ -276,8 +253,33 @@
     .btn-new{ background:linear-gradient(180deg,#e6f7ff,#bfe7ff); }
     .btn-reset{ background:linear-gradient(180deg,#ffe7ef,#ffc7d8); }
 
+    .bottom-row{ display:none; }
+    .coach-box{ padding:14px 16px; }
+    .coach-title{ font-weight:900; font-size:21px; margin-bottom:8px; }
+    .coach-list{ display:grid; gap:10px; }
+    .coach-item{
+      display:grid;grid-template-columns:42px 1fr;gap:10px;align-items:start;
+      background:#fff;border:1px solid #e9eef6;border-radius:18px;padding:10px 12px;
+    }
+    .coach-num{
+      width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+      font-weight:900;font-size:20px;background:linear-gradient(180deg,#fff4c5,#ffe07e);
+    }
+    .coach-text{ font-size:16px; line-height:1.35; font-weight:800; color:#34526d; }
+
+    .confetti-area{
+      position:relative;min-height:100px;border-radius:24px;overflow:hidden;
+      background:linear-gradient(180deg,#f5fffb,#eefdf6);border:1px solid #d7f5e4;
+      display:grid;place-items:center;text-align:center;padding:16px;
+    }
+    .cheer{ font-size:clamp(22px,2.2vw,34px); font-weight:900; color:#1e7653; }
+    .tiny{ color:var(--muted); font-size:14px; font-weight:800; }
+    .confetti-piece{ position:absolute; width:12px; height:18px; border-radius:4px; opacity:0; }
+
+    .footer{ display:none; }
+
     @media (max-width:980px){
-      .strategy-grid,.problem-bar{ grid-template-columns:1fr; }
+      .strategy-grid,.problem-bar,.bottom-row{ grid-template-columns:1fr; }
       .helper-chip{ min-width:0; }
     }
   </style>
@@ -299,7 +301,7 @@
     </section>
 
     <main class="main">
-      <section class="card play-card">
+      <section class="card">
         <div class="problem-bar">
           <div class="equation-box">
             <div class="eq-label">Let’s solve</div>
@@ -355,7 +357,20 @@
           <button id="newBtn" class="btn btn-new" type="button">New Question ✨</button>
         </div>
       </section>
+
+      <section class="bottom-row">
+        <aside class="card coach-box">
+          <div class="coach-title">How to think</div>
+          <div id="coachList" class="coach-list"></div>
+        </aside>
+        <aside id="cheerBox" class="card confetti-area">
+          <div class="cheer" id="cheerText">You can do it!</div>
+          <div class="tiny" id="cheerSub">One jump at a time.</div>
+        </aside>
+      </section>
     </main>
+
+    <div class="footer">Designed by Lim Kim Sze © 2026</div>
   </div>
 
   <script>
@@ -369,6 +384,10 @@
     const bubbleTextEl = document.getElementById('bubbleText');
     const bubbleSubEl = document.getElementById('bubbleSub');
     const stepsTextEl = document.getElementById('stepsText');
+    const coachListEl = document.getElementById('coachList');
+    const helperChipEl = document.getElementById('helperChip');
+    const cheerTextEl = document.getElementById('cheerText');
+    const cheerSubEl = document.getElementById('cheerSub');
     const headTitleEl = document.getElementById('headTitle');
     const fingerTitleEl = document.getElementById('fingerTitle');
     const headWrapEl = document.getElementById('headWrap');
@@ -572,24 +591,44 @@
     }
 
     function renderCoach(){
-      return;
+      const q = state.question;
+      const items = state.mode === 'add'
+        ? [
+            `Look at ${q.a} + ${q.b}. Put the bigger number, ${q.headNum}, in your head.`,
+            `Show ${q.fingerNum} fingers on 2 hands.`,
+            `Count on ${q.fingerNum} times: ${q.counted.join(', ')}.`,
+            `Write the answer and press Check.`
+          ]
+        : [
+            `Look at ${q.a} − ${q.b}. Put ${q.headNum} in your head.`,
+            `Show ${q.fingerNum} fingers on 2 hands.`,
+            `Count back ${q.fingerNum} times: ${q.counted.join(', ')}.`,
+            `Write the answer and press Check.`
+          ];
+
+      coachListEl.innerHTML = items.map((text, i) => `
+        <div class="coach-item">
+          <div class="coach-num">${i + 1}</div>
+          <div class="coach-text">${text}</div>
+        </div>
+      `).join('');
     }
 
     function updateBubble(){
       const q = state.question;
       if(!state.introDone){
         bubbleTextEl.textContent = 'Press Next to start counting!';
-        bubbleSubEl.textContent = state.mode === 'add'
-          ? 'First, put the bigger number in your head.'
-          : 'First, put the starting number in your head.';
+        bubbleSubEl.textContent = state.mode === 'add' ? 'First, put the bigger number in your head.' : 'First, put the starting number in your head.';
+        cheerTextEl.textContent = state.mode === 'add' ? 'Ready to count on?' : 'Ready to count back?';
+        cheerSubEl.textContent = 'Press Next to hear the first instruction.';
         return;
       }
 
       if(state.step === 0){
-        bubbleTextEl.textContent = state.mode === 'add'
-          ? `Start at ${q.headNum}. Get ready to count on!`
-          : `Start at ${q.headNum}. Get ready to count back!`;
+        bubbleTextEl.textContent = state.mode === 'add' ? `Start at ${q.headNum}. Get ready to count on!` : `Start at ${q.headNum}. Get ready to count back!`;
         bubbleSubEl.textContent = `Show ${q.fingerNum} fingers and press Next.`;
+        cheerTextEl.textContent = state.mode === 'add' ? 'Count on!' : 'Count back!';
+        cheerSubEl.textContent = 'Watch the arrows jump on the number tape.';
         return;
       }
 
@@ -597,11 +636,15 @@
         const said = q.counted[state.step - 1];
         bubbleTextEl.textContent = `${said}`;
         bubbleSubEl.textContent = `${currentFingerDisplay()} fingers are still up.`;
+        cheerTextEl.textContent = `Nice! We said ${said}.`;
+        cheerSubEl.textContent = 'Keep going.';
         return;
       }
 
       bubbleTextEl.textContent = 'Now write the answer.';
       bubbleSubEl.textContent = 'Type it in the box and press Check.';
+      cheerTextEl.textContent = 'Can you solve it?';
+      cheerSubEl.textContent = 'Use the count to help you.';
     }
 
     function drawArrows(){
